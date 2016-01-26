@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-__author__ = 'yixuanhe'
-
 import json
 import re
 import gensim
+
+__author__ = 'yixuanhe'
 
 
 # poem exact, deal with some noise in poem data
