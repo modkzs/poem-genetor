@@ -5,7 +5,7 @@ from Function import function
 __author__ = 'yixuanhe'
 
 
-class BasicSgdLayer(PlainLayer.Layer):
+class BasicSgdLayer(PlainLayer.PlainLayer):
     """basic layer in neural network using sgd"""
 
     def __init__(self, cell_num, func, input_num):
@@ -52,7 +52,7 @@ class BasicSgdLayer(PlainLayer.Layer):
 
         return np.array(value)
 
-    def getDerivative(self, err, x):
+    def getDerivative(self, err):
         """The function which compute the derivative of this layer
         Args:
             err: the err in last layer
@@ -62,18 +62,26 @@ class BasicSgdLayer(PlainLayer.Layer):
 
 
         derivative = []
+        delta = []
         for i in range(self.cell_num):
             d = self.func.derivative(self.input, self.weight[i])
-            delta = err[i] * d
-            derivative.append(delta)
+            delt = err[i] * d
+            delta.append(delt)
+            derivative.append(delt * self.input)
 
-        return np.array(derivative)
+        self.derivative = np.array(derivative)
+        self.delta = np.array(delta)
+
+        return self.derivative
 
     def update(self):
         """The function of updating weight.
         """
 
         self.weight -= self.derivative
+
+    def getDelte(self):
+        return self.delta
 
 if __name__ == '__main__':
     sg = function.Sigmoid()
@@ -83,6 +91,7 @@ if __name__ == '__main__':
     l = np.random.normal(loc=0.0, scale=1.0, size=2)
     y = np.array([1, 2])
 
-    PlainLayer.computeNet(x, l)
-    print(PlainLayer.computeOutput())
+    layer.computeNet(x)
+    layer.computeOutput()
+    print(layer.getDerivative(y))
 

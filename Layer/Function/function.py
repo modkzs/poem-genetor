@@ -49,7 +49,7 @@ class Sigmoid(Function):
 
     def derivative(self, x, w):
         v = 1/(1+np.exp(np.dot(w, x)))
-        return v*(1-v)*x
+        return v*(1-v)
 
 
 class Softplus(Function):
@@ -62,7 +62,7 @@ class Softplus(Function):
 
     def derivative(self, x, w):
         v = np.exp(np.dot(w, x))
-        return (v/(1+v))*x
+        return v/(1+v)
 
 
 if __name__ == '__main__':

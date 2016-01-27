@@ -27,5 +27,9 @@ class PlainLayer(metaclass=ABCMeta):
     def update(self):
         pass
 
+    @abstractmethod
+    def getDelte(self):
+        pass
+
 
 

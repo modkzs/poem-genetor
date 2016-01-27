@@ -27,13 +27,18 @@ class RNNSgdLayer(PlainLayer.PlainLayer):
 
         self.backoff = backoff
 
+        # s and x store history input:
+        # s : St-4, St-3, St-2, St-1
+        # x : Xt-3, Xt-2, Xt-1, Xt
         self.s = []
         self.x = []
+
         for i in range(backoff):
             self.s.append(0)
             self.x.append(0)
 
-    def _push_value(self, l, value):
+    @staticmethod
+    def _push_value(l, value):
         """This is a pop operation of queue implemented by list"""
         l.pop(1)
         l.append(value)
@@ -50,7 +55,9 @@ class RNNSgdLayer(PlainLayer.PlainLayer):
         self.net += np.dot(self.layer_weight, layer)
 
     def update(self):
-        pass
+        self.layer_weight -= self.derivative_layer
+        self.input_weight -= self.derivative_input
+
 
     def computeOutput(self):
         value = []
@@ -59,11 +66,37 @@ class RNNSgdLayer(PlainLayer.PlainLayer):
             value.append(self.func.f(n))
         return np.array(value)
 
-    def getDerivative(self, err, x):
+    def getDerivative(self, err):
+        derivative_input = []
+        derivative_layer = []
+        last = []
+        for i in range(self.cell_num):
+            d_i = self.func.derivative(self.input, self.input_weight[i])
+            delta = err[i] * d_i
+            derivative_input.append(delta)
+
+        for i in range(self.cell_num):
+            derivative_layer.append(0)
+            last.append(1)
+
+        for i in range(-1, -self.backoff-1, -1):
+            for j in range(self.cell_num):
+                d_l = self.func.derivative(self.s[i], self.layer_weight[j])
+                delta = err[j] * d_l
+                last[j] *= delta * self.s[i]
+                derivative_layer[j] += last[j]
+
+        self.derivative_input = np.array(derivative_input)
+        self.derivative_layer = np.array(derivative_layer)
+        print(self.derivative_layer)
+        print(self.derivative_input)
+
+    def getDelte(self):
         pass
 
 
 if __name__ == '__main__':
+
     sg = function.Sigmoid()
     layer = RNNSgdLayer(2, sg, 5, 4)
 
@@ -74,7 +107,5 @@ if __name__ == '__main__':
     layer.computeNet(x, l)
     layer.computeOutput()
 
-    a = [1, 2, 3, 4, 5, 6]
-    a.pop(0)
-    a.append(7)
-    print(a)
+    layer.getDerivative(y)
+
