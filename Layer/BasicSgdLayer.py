@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import PlainLayer
+from . import PlainLayer
 import numpy as np
-from Function import function
+from .Function import function
 __author__ = 'yixuanhe'
 
 

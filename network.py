@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-import Layer
-import csv
+from Layer import RNNSgdLayer, SoftmaxLayer
+from Layer.Function.function import Sigmoid
+import numpy as np
 __author__ = 'yixuanhe'
 
 
@@ -11,8 +12,8 @@ class RNN:
         self.hidden_num = hidden_num
         self.input_num = input_num
 
-        self.hidden_layer = Layer.RNNSgdLayer(self.hidden_num, Layer.Function.Sigmoid(), input_num, backoff)
-        self.output_layer = Layer.SoftmaxLayer(self.output_num, self.hidden_num)
+        self.hidden_layer = RNNSgdLayer.RNNSgdLayer(self.hidden_num, Sigmoid(), input_num, backoff)
+        self.output_layer = SoftmaxLayer.SoftmaxLayer(self.output_num, self.hidden_num)
 
         hidden_output = []
         for i in range(hidden_num):
@@ -39,6 +40,17 @@ class RNN:
     def train(self, x, y):
         self.getOutput(x)
         self.updateNetwork(y)
+
+    def save(self):
+        np.save("model/out", self.output_layer.weight)
+        np.save("model/hidden_input", self.hidden_layer.input_weight)
+        np.save("model/hidden_layer", self.hidden_layer.layer_weight)
+
+    def load(self):
+        self.output_layer.weight = np.load("model/out.npy")
+        self.hidden_layer.input_weight = np.load("model/hidden_input.npy")
+        self.hidden_layer.layer_weight = np.load("model/hidden_layer.npy")
+
 
 
 def feature_generator(file_name, length):
@@ -70,14 +82,39 @@ def feature_generator(file_name, length):
             data_y.append(y)
     return data_x, data_y
 
+
+def getTraindata(data, number):
+    datas = data.split(" ")
+    pos = int(datas[1])+1
+    features = datas[0]
+    features_string = features.split(",")
+    feature = []
+    for f in features_string:
+        if f != "":
+            feature.append(float(f))
+    feature = np.array(feature)
+
+    label = []
+    for i in range(number):
+        if i != pos:
+            label.append(0)
+        else:
+            label.append(1)
+    label = np.array(label)
+
+    return feature, label
+
 if __name__ == "__main__":
-    rnn = RNN(301, 400, 8000)
+    num = 7357
+    rnn = RNN(num, 400, 301)
 
-    x, y = feature_generator("data/train_data1", 100)
+    n = 1
+    for i in range(3):
+        with open("/Volumes/devil/train_data") as f:
+            for l in f:
+                print(str(n) + "th train")
+                n += 1
+                x, y = getTraindata(l, num)
+                rnn.train(x, y)
 
-    leng = len(x)
-
-    while True:
-        for i in range(leng):
-            rnn.train(x[i], y[i])
-
+    rnn.save()

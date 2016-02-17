@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-import PlainLayer
+from . import PlainLayer
 import numpy as np
-from Function import function
+from .Function import function
 __author__ = 'yixuanhe'
+
 
 class RNNSgdLayer(PlainLayer.PlainLayer):
     """RNN layer in neural network using sgd.
@@ -70,7 +71,7 @@ class RNNSgdLayer(PlainLayer.PlainLayer):
         derivative_input = []
         derivative_layer = []
         last = []
-        for i in range(self.cell_num):
+        for i in range(self.input_num):
             d_i = self.func.derivative(self.input, self.input_weight[i])
             delta = err[i] * d_i
             derivative_input.append(delta)
@@ -86,10 +87,8 @@ class RNNSgdLayer(PlainLayer.PlainLayer):
                 last[j] *= delta * self.s[i]
                 derivative_layer[j] += last[j]
 
-        self.derivative_input = np.array(derivative_input)
+        self.derivative_input = np.array(derivative_input).T
         self.derivative_layer = np.array(derivative_layer)
-        print(self.derivative_layer)
-        print(self.derivative_input)
 
     def getDelte(self):
         pass

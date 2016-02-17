@@ -13,9 +13,10 @@ def data_extract(data_location):
     i = 1
     num = 0
     with open(data_location) as f:
-        for l in f.readlines():
+        for l in f:
+            flag = False
             num += 1
-            print("process " + str(num) + "th data")
+
             middle = []
             obj = json.loads(l)
             s = obj['result']['content']
@@ -33,6 +34,8 @@ def data_extract(data_location):
                     if line != '':
                         line += u"？"
                         middle.append(line)
+            else:
+                middle.append(s)
 
             for m in middle:
                 lines = m.split(u"。")
@@ -50,17 +53,17 @@ def data_extract(data_location):
                                 pos = leng - i - 1
                                 line = line[:pos] + " " + line[pos:]
                             poems.append(line)
-    print(num)
+                        flag = True
     return poems, ch
 
 
 # training vord2vec using data
 def train(poems):
     num_features = 300
-    min_word_count = 1
+    min_word_count = 0
     num_workers = 48
     context = 20
-    epoch = 20000
+    epoch = 20
     sample = 1e-5
     model = gensim.models.word2vec.Word2Vec(
         poems,
@@ -99,8 +102,15 @@ def genTrainData(poems, model, data_location, ch_set):
 
 
 poems, ch_set = data_extract("data/test.json")
+print(len(poems))
+print(len(ch_set))
+with open("data/ch_map", "w") as f:
+    for k in ch_set:
+        f.write(k + "," + str(ch_set[k]) + "\n")
+
 print("********** !data extract finish!************")
 model = train(poems)
+model.save("data/model")
 print("********** !model training finish!************")
-genTrainData(poems, model, "data/train_data", ch_set)
+genTrainData(poems, model, "/Volumes/devil/train_data", ch_set)
 print("********** !write to file finish!************")

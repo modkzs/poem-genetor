@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import PlainLayer
+from . import PlainLayer
 import numpy as np
-from Function import Softmax
+from .Function import Softmax
 __author__ = 'yixuanhe'
 
 
@@ -26,7 +26,7 @@ class SoftmaxLayer(PlainLayer.PlainLayer):
         delta = []
 
         for i in range(self.output_num):
-            delta.append(self.func.derivative(self.input, y[i], self.value[i]))
+            delta.append(self.func.derivative(y[i], self.value[i]))
             derivative.append(delta[i]*self.input)
 
         self.delta = delta
@@ -38,11 +38,7 @@ class SoftmaxLayer(PlainLayer.PlainLayer):
         self.input = x
 
     def computeOutput(self):
-        value = []
-
-        for n in self.net:
-            value.append(self.func.f(n))
-
+        value = self.func.f(self.net)
         self.value = np.array(value)
         return self.value
 
